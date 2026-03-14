@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* 1930s rubber hose — aged paper & film */
+  --paper: #f4f1ea;
+  --ink: #1a1a1a;
+  --ink-muted: #4a4a4a;
+  --border-vintage: #2d2d2d;
+  --film-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+}
+
+/* Global grain overlay (entire app) */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: var(--film-grain);
+  mix-blend-mode: overlay;
+  opacity: 0.85;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* Night phase keeps dark + grain */
+.night-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background: var(--film-grain);
+  opacity: 0.6;
+  mix-blend-mode: overlay;
+}
+
+.night-lights-out {
+  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(20, 20, 20, 0.98) 0%, #0a0a0a 70%);
+  min-height: 100vh;
+  color: #e8e4dc;
+}
+
+/* Squash and stretch — rubber hose button hover */
+@keyframes squash-stretch {
+  0% { transform: scale(1, 1); }
+  15% { transform: scale(1.08, 0.92); }
+  30% { transform: scale(0.95, 1.06); }
+  45% { transform: scale(1.03, 0.97); }
+  60% { transform: scale(0.98, 1.02); }
+  100% { transform: scale(1, 1); }
+}
+
+.btn-rubber {
+  display: inline-block;
+  transition: transform 0.15s ease-out;
+}
+
+.btn-rubber:hover {
+  animation: squash-stretch 0.5s ease-out;
+}
+
+.btn-rubber:active {
+  transform: scale(0.96, 1.04);
+}
+
+/* Apply to all buttons by default */
+button,
+a[role="button"],
+[class*="button"] {
+  transition: transform 0.15s ease-out;
+}
+
+button:hover,
+a[role="button"]:hover {
+  animation: squash-stretch 0.5s ease-out;
+}
+
+button:active,
+a[role="button"]:active {
+  transform: scale(0.96, 1.04);
+}
+
+/* Role Reveal — bouncy slide-in */
+@keyframes reveal-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(-4%);
+  }
+  85% {
+    transform: translateX(2%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.reveal-slide-in {
+  animation: reveal-slide-in 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Ace — broken projector flicker */
+@keyframes projector-flicker {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  4% { opacity: 0.85; filter: brightness(0.7); }
+  8% { opacity: 1; filter: brightness(1.1); }
+  12% { opacity: 0.3; filter: brightness(0.4); }
+  16% { opacity: 1; filter: brightness(1); }
+  22% { opacity: 0.6; filter: brightness(0.8); }
+  26% { opacity: 1; filter: brightness(1); }
+  30% { opacity: 0.9; filter: brightness(0.9); }
+  35% { opacity: 0.2; filter: brightness(0.3); }
+  40% { opacity: 1; filter: brightness(1); }
+  48% { opacity: 0.7; filter: brightness(0.85); }
+  55% { opacity: 1; filter: brightness(1); }
+  60% { opacity: 0.4; filter: brightness(0.6); }
+  68% { opacity: 1; filter: brightness(1.05); }
+  75% { opacity: 0.8; filter: brightness(0.9); }
+  82% { opacity: 1; filter: brightness(1); }
+  90% { opacity: 0.5; filter: brightness(0.7); }
+  96% { opacity: 1; filter: brightness(1); }
+}
+
+.reveal-flicker {
+  animation: projector-flicker 2.5s ease-in-out infinite;
+}
