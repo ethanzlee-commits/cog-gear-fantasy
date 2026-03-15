@@ -30,12 +30,12 @@ Social deduction game built with **Next.js** and **Supabase**. This repo include
 
    **Run without Supabase:** If you don't set `NEXT_PUBLIC_SUPABASE_URL` (or leave `.env.local` missing), the app uses an **in-memory backend** for the lobby. You can "Start a New Production" and "Join a Cast" (e.g. in another tab with the same code); the player list in the lobby updates every few seconds. Data is lost when the dev server restarts. Game phase (night/day) and auth still require Supabase.
 
-4. **Let anyone join from anywhere (different Wi‑Fi / different cities)**
-   - Use **Supabase** (steps above) so rooms are stored in the cloud.
+4. **Let people join online (different Wi‑Fi / different cities)**
+   - **Supabase** — Rooms must be in the cloud so everyone hits the same data. Run the migrations (step 2) and set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local` (and in your deployment).
    - **Deploy the app** so there’s one public URL everyone can open:
-     - **Vercel (recommended):** Push this repo to GitHub, then [vercel.com](https://vercel.com) → Import project → add env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` → Deploy. Share the deployed URL (e.g. `https://your-app.vercel.app`) and the 4-letter room code; anyone can open that link, click Join a Cast, and join.
-     - **Other hosts:** Build with `npm run build`, run `npm start` (or use the host’s Node server), and set the same env vars. Put the app behind HTTPS so it’s reachable from anywhere.
-   - With Supabase + a public URL, the host and players can be on different networks and still join the same lobby.
+     - **Vercel:** Push to GitHub → [vercel.com](https://vercel.com) → Import project → add env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` → Deploy. Share your app URL (e.g. `https://your-app.vercel.app`).
+     - **Other hosts:** `npm run build` and `npm start`, set the same env vars, and serve over HTTPS.
+   - **Sharing:** In the lobby, use **Copy join link**. That link (e.g. `https://your-app.vercel.app/join?code=ABCD`) opens the join page with the room code pre-filled; friends just enter a nickname and click Join. Without deployment, only people on the same network can use your dev server URL (e.g. `http://YOUR_IP:3000`).
 
 5. **Room Code lobby (no accounts)**
    - **Home:** “Start a New Production” creates a room with a random 4-letter code and adds you as host. “Join a Cast” opens a form to enter the code and nickname.

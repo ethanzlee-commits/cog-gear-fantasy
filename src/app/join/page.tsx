@@ -5,7 +5,7 @@ import { JoinForm } from "./JoinForm";
 export default function JoinPage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-paper text-ink">
-      <h1 className="text-2xl font-bold text-ink uppercase tracking-wide mb-2">Join a Cast</h1>
+      <h1 className="font-title text-2xl font-bold text-ink uppercase tracking-wide mb-2">Join a Cast</h1>
       <p className="text-ink-muted mb-6 text-center text-sm">Enter the 4-letter room code</p>
       <Suspense fallback={<div className="text-ink-muted">Loading…</div>}>
         <JoinForm />

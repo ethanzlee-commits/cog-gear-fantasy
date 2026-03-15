@@ -45,7 +45,7 @@ export function LoginForm() {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-paper text-ink">
-      <h1 className="text-2xl font-bold text-ink uppercase tracking-wide mb-6">Project: Cog-Gear Fantasy</h1>
+      <h1 className="font-title text-2xl font-bold text-ink uppercase tracking-wide mb-6">Project: Cog-Gear Fantasy</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
         <div>
           <label htmlFor="email" className="block text-ink-muted text-sm mb-1">Email</label>
@@ -78,7 +78,7 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 rounded-md border-2 border-ink bg-ink text-paper font-bold uppercase tracking-wide py-2 disabled:opacity-50 hover:bg-ink-muted"
+            className="font-action flex-1 rounded-md border-2 border-ink bg-ink text-paper font-bold uppercase tracking-wide py-2 disabled:opacity-50 hover:bg-ink-muted"
           >
             Sign in
           </button>
@@ -86,7 +86,7 @@ export function LoginForm() {
             type="button"
             onClick={handleSignUp}
             disabled={loading}
-            className="flex-1 rounded-md border-2 border-ink bg-paper text-ink font-bold uppercase py-2 disabled:opacity-50 hover:bg-ink hover:text-paper"
+            className="font-action flex-1 rounded-md border-2 border-ink bg-paper text-ink font-bold uppercase py-2 disabled:opacity-50 hover:bg-ink hover:text-paper"
           >
             Sign up
           </button>

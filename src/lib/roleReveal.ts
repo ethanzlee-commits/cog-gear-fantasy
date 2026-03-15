@@ -20,7 +20,7 @@ export const ROLE_ABILITY: Record<Role, string> = {
   undertaker: "Cleanup — You know exactly who has been eliminated. Clean up a body to gain that player's ability for one round.",
   ghost: "Vengeance — If voted out during a meeting, you immediately take one player of your choice with you.",
   professor: "The Reveal — After Round 3, you automatically discover and reveal the identity of the Ace.",
-  thief: "Identity Theft — Choose to switch your own role with another player's. Change teams or powers in an instant.",
+  thief: "Identity Theft — Copy one player's role for the rest of the game. They keep their role; you also have it. One-time use.",
 };
 
 /** Per-role character image for the Reveal screen */

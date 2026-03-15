@@ -22,17 +22,14 @@ export function Clapboard({ code }: ClapboardProps) {
             {Array.from({ length: 4 }).map((_, i) => (
               <span
                 key={i}
-                className="inline-flex items-center justify-center w-12 h-14 sm:w-14 sm:h-16 text-3xl sm:text-4xl font-bold text-paper tracking-tight border-b-2 border-ink-muted"
-                style={{
-                  fontFamily: "Georgia, 'Times New Roman', serif",
-                  textShadow: "1px 1px 0 rgba(0,0,0,0.5)",
-                }}
+                className="font-game-ui inline-flex items-center justify-center w-12 h-14 sm:w-14 sm:h-16 text-3xl sm:text-4xl font-bold text-paper tracking-tight border-b-2 border-ink-muted"
+                style={{ textShadow: "1px 1px 0 rgba(0,0,0,0.5)" }}
               >
                 {code[i] ?? "—"}
               </span>
             ))}
           </div>
-          <p className="text-center text-ink-muted text-xs mt-2 uppercase tracking-widest font-medium">
+          <p className="font-flavor text-center text-ink-muted text-xs mt-2 uppercase tracking-widest font-medium">
             Room code
           </p>
         </div>

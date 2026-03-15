@@ -64,7 +64,7 @@ export function CharacterCard({
         />
       </div>
       <div className="border-t-2 border-ink bg-paper px-3 py-1">
-        <p className="font-bold uppercase tracking-wide text-ink text-sm">
+        <p className="font-game-ui font-bold uppercase tracking-wide text-ink text-sm">
           {ROLE_DISPLAY[role]}
         </p>
         {subtitle && (

@@ -45,13 +45,10 @@ export function RoleReveal({
 
         {/* Name + ability in vintage typewriter font */}
         <div className="mt-6 text-center">
-          <h1 className="text-2xl sm:text-3xl font-bold uppercase tracking-wider text-ink">
+          <h1 className="font-title text-2xl sm:text-3xl font-bold uppercase tracking-wider text-ink">
             {ROLE_DISPLAY[role]}
           </h1>
-          <p
-            className="mt-3 text-sm sm:text-base text-ink-muted max-w-md mx-auto leading-relaxed font-typewriter"
-            style={{ fontFamily: "'Special Elite', 'Courier New', monospace" }}
-          >
+          <p className="mt-3 text-sm sm:text-base text-ink-muted max-w-md mx-auto leading-relaxed font-flavor">
             {ROLE_ABILITY[role]}
           </p>
         </div>
@@ -61,7 +58,7 @@ export function RoleReveal({
             <button
               type="button"
               onClick={onContinue}
-              className="rounded-md border-2 border-ink bg-ink text-paper font-bold uppercase tracking-wide py-3 px-8 hover:bg-ink-muted"
+              className="font-action rounded-md border-2 border-ink bg-ink text-paper font-bold uppercase tracking-wide py-3 px-8 hover:bg-ink-muted"
             >
               Continue
             </button>

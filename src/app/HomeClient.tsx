@@ -39,13 +39,13 @@ export function HomeClient() {
       <button
         onClick={handleStartProduction}
         disabled={hosting}
-        className="w-full rounded-md border-2 border-ink bg-ink text-paper font-bold uppercase tracking-wide py-3 px-6 disabled:opacity-50 hover:bg-ink-muted hover:border-ink-muted"
+        className="font-action w-full rounded-md border-2 border-ink bg-ink text-paper font-bold uppercase tracking-wide py-3 px-6 disabled:opacity-50 hover:bg-ink-muted hover:border-ink-muted"
       >
         {hosting ? "Starting…" : "Start a New Production"}
       </button>
       <a
         href="/join"
-        className="w-full rounded-md border-2 border-ink bg-paper text-ink font-bold uppercase tracking-wide py-3 px-6 text-center hover:bg-ink hover:text-paper"
+        className="font-action w-full rounded-md border-2 border-ink bg-paper text-ink font-bold uppercase tracking-wide py-3 px-6 text-center hover:bg-ink hover:text-paper"
       >
         Join a Cast
       </a>

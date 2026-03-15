@@ -31,7 +31,7 @@ export default function HomePage() {
         aria-hidden
       />
       <div className="relative z-10 flex flex-col items-center w-full">
-        <h1 className="text-3xl font-bold text-ink mb-1 text-center uppercase tracking-wide mt-8">
+        <h1 className="font-title text-3xl font-bold text-ink mb-1 text-center uppercase tracking-wide mt-8">
           Project: Cog-Gear Fantasy
         </h1>
         <p className="text-ink-muted mb-8 text-center text-sm">Social deduction · Rubber hose</p>
@@ -39,7 +39,7 @@ export default function HomePage() {
         <HomeClient />
 
         <section className="w-full max-w-4xl mt-16">
-          <h2 className="text-xl font-bold uppercase tracking-wide text-ink mb-4 text-center border-b-2 border-ink pb-2">
+          <h2 className="font-title text-xl font-bold uppercase tracking-wide text-ink mb-4 text-center border-b-2 border-ink pb-2">
             The cast
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 justify-items-center">
@@ -56,12 +56,18 @@ export default function HomePage() {
           >
             Join a cast →
           </Link>
-          <Link
-            href="/reveal?role=ace"
-            className="text-ink-muted hover:text-ink text-xs underline underline-offset-2"
-          >
-            Preview role reveal (Ace)
-          </Link>
+        <Link
+          href="/reveal?role=ace"
+          className="text-ink-muted hover:text-ink text-xs underline underline-offset-2"
+        >
+          Preview role reveal (Ace)
+        </Link>
+        <Link
+          href="/dev"
+          className="text-ink-muted hover:text-ink text-xs underline underline-offset-2"
+        >
+          Dev: preview night phase (no players needed)
+        </Link>
         </div>
       </div>
     </main>

@@ -33,9 +33,22 @@ export function LobbyClient({ roomCode, useSupabase, initialPlayers }: LobbyClie
   const [nickname, setNickname] = useState<string | null>(null);
   const [players, setPlayers] = useState<PresencePlayer[]>(initialPlayers);
   const [shareUrl, setShareUrl] = useState("");
+  const [copied, setCopied] = useState(false);
   useEffect(() => {
     setShareUrl(typeof window !== "undefined" ? window.location.origin : "");
   }, []);
+
+  const joinLink = shareUrl ? `${shareUrl}/join?code=${roomCode}` : "";
+  async function copyJoinLink() {
+    if (!joinLink) return;
+    try {
+      await navigator.clipboard.writeText(joinLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore
+    }
+  }
 
   useEffect(() => {
     let channel: ReturnType<ReturnType<typeof createClient>["channel"]> | null = null;
@@ -123,14 +136,23 @@ export function LobbyClient({ roomCode, useSupabase, initialPlayers }: LobbyClie
     >
       <div className="absolute inset-0 bg-paper/75 pointer-events-none" aria-hidden />
       <div className="relative z-10 flex flex-col items-center w-full">
-      <h1 className="text-xl font-bold text-ink uppercase tracking-wide mb-6">Lobby</h1>
+      <h1 className="font-title text-xl font-bold text-ink uppercase tracking-wide mb-6">Lobby</h1>
 
       <Clapboard code={roomCode} />
 
       <p className="text-ink-muted text-sm mt-6 mb-2">Share the code so others can join.</p>
+      {joinLink && (
+        <button
+          type="button"
+          onClick={copyJoinLink}
+          className="mb-2 rounded-lg border-2 border-ink bg-paper px-4 py-2 text-sm font-medium text-ink hover:bg-ink hover:text-paper transition-colors"
+        >
+          {copied ? "Copied!" : "Copy join link"}
+        </button>
+      )}
       {isPublicUrl() && useSupabase ? (
         <p className="text-ink-muted text-xs max-w-sm mb-2">
-          <strong>Anyone can join from anywhere.</strong> Share this link and the code: <span className="font-mono text-[0.65rem] break-all">{shareUrl}</span> — friends open it, click Join a Cast, and enter the 4-letter code.
+          <strong>Anyone can join from anywhere.</strong> Share the link above — friends open it, enter a nickname, and join. No need to type the code.
         </p>
       ) : useSupabase ? (
         <p className="text-ink-muted text-xs max-w-sm mb-2">

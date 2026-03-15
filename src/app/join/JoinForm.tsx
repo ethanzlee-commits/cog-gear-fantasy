@@ -88,7 +88,7 @@ export function JoinForm() {
       <button
         type="submit"
         disabled={loading || code.length !== 4}
-        className="w-full rounded-md border-2 border-ink bg-ink text-paper font-bold uppercase tracking-wide py-2 disabled:opacity-50 hover:bg-ink-muted"
+        className="font-action w-full rounded-md border-2 border-ink bg-ink text-paper font-bold uppercase tracking-wide py-2 disabled:opacity-50 hover:bg-ink-muted"
       >
         {loading ? "Joining…" : "Join"}
       </button>

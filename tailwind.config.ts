@@ -14,7 +14,16 @@ const config: Config = {
         "ink-muted": "#4a4a4a",
       },
       fontFamily: {
-        typewriter: ["'Special Elite'", "'Courier New'", "monospace"],
+        /* Main titles — 1930s movie poster (Limelight) */
+        title: ["'Limelight'", "cursive"],
+        /* Buttons / action — loud, hand-drawn (Bangers) */
+        action: ["'Bangers'", "cursive"],
+        /* Dialogue / chat — round, friendly (Ranchers) */
+        dialogue: ["'Ranchers'", "cursive"],
+        /* Game UI / role names — period display (Bebas Neue; use Market Deco if you add the font file) */
+        "game-ui": ["'Bebas Neue'", "sans-serif"],
+        /* Flavor text — 1930s typewriter (Special Elite; use Bygonest if you add the font file) */
+        flavor: ["'Special Elite'", "'Courier New'", "monospace"],
       },
     },
   },

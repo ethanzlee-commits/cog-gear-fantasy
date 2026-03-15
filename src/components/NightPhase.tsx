@@ -22,12 +22,24 @@ const ROLE_LABELS: Record<Role, string> = {
   thief: "The Thief",
 };
 
+/** Payload for dev mode so the host can update use counts / Thief copy state */
+export type DevActionPayload =
+  | { action: "ace"; targetPlayerId: string }
+  | { action: "bot" }
+  | { action: "miner" }
+  | { action: "strongman"; protectPlayerId: string | null }
+  | { action: "undertaker" }
+  | { action: "thief"; targetPlayerId: string };
+
 interface NightPhaseProps {
   game: Game;
   currentPlayer: Player;
   /** All alive players in the game (for targeting). Exclude self where required. */
   alivePlayers: Player[];
-  onActionComplete?: () => void;
+  /** Called after an action is submitted. In dev mode, optional payload describes the action for updating use counts. */
+  onActionComplete?: (devPayload?: DevActionPayload) => void;
+  /** When true, actions are no-op (for dev/demo preview without Supabase). */
+  devMode?: boolean;
 }
 
 export function NightPhase({
@@ -35,6 +47,7 @@ export function NightPhase({
   currentPlayer,
   alivePlayers,
   onActionComplete,
+  devMode = false,
 }: NightPhaseProps) {
   const [error, setError] = useState<string | null>(null);
   const [minerResult, setMinerResult] = useState<string | null>(null);
@@ -46,6 +59,11 @@ export function NightPhase({
 
   const handleAce = async (targetId: string) => {
     setError(null);
+    if (devMode) {
+      setSubmitted(true);
+      onActionComplete?.({ action: "ace", targetPlayerId: targetId });
+      return;
+    }
     try {
       await submitAceTarget(game.id, currentPlayer.id, targetId);
       setSubmitted(true);
@@ -61,6 +79,11 @@ export function NightPhase({
       return;
     }
     setError(null);
+    if (devMode) {
+      setSubmitted(true);
+      onActionComplete?.({ action: "bot" });
+      return;
+    }
     try {
       await submitBotSwap(game.id, currentPlayer.id, target1Id, target2Id);
       setSubmitted(true);
@@ -73,6 +96,13 @@ export function NightPhase({
   const handleMiner = async (targetId: string) => {
     setError(null);
     setMinerResult(null);
+    if (devMode) {
+      const name = alivePlayers.find((p) => p.id === targetId)?.display_name ?? "Someone";
+      setMinerResult(`[Dev] This player visited ${name}.`);
+      setSubmitted(true);
+      onActionComplete?.({ action: "miner" });
+      return;
+    }
     try {
       const result = await submitMinerTarget(game.id, currentPlayer.id, targetId);
       setMinerResult(
@@ -89,6 +119,11 @@ export function NightPhase({
 
   const handleStrongman = async (protectPlayerId: string | null) => {
     setError(null);
+    if (devMode) {
+      setSubmitted(true);
+      onActionComplete?.({ action: "strongman", protectPlayerId });
+      return;
+    }
     try {
       await submitStrongmanProtection(game.id, currentPlayer.id, protectPlayerId);
       setSubmitted(true);
@@ -101,6 +136,12 @@ export function NightPhase({
   const handleUndertaker = async () => {
     setError(null);
     setUndertakerResult(null);
+    if (devMode) {
+      setUndertakerResult("[Dev] Body cleaned.");
+      setSubmitted(true);
+      onActionComplete?.({ action: "undertaker" });
+      return;
+    }
     try {
       const data = await submitUndertakerClean(game.id, currentPlayer.id);
       setUndertakerResult(data?.message ?? (data?.success ? "Body cleaned." : "No body to clean."));
@@ -113,6 +154,11 @@ export function NightPhase({
 
   const handleThiefSwap = async (targetId: string) => {
     setError(null);
+    if (devMode) {
+      setSubmitted(true);
+      onActionComplete?.({ action: "thief", targetPlayerId: targetId });
+      return;
+    }
     try {
       await submitThiefSwap(game.id, currentPlayer.id, targetId);
       setSubmitted(true);
@@ -128,14 +174,14 @@ export function NightPhase({
       <div className="night-overlay" aria-hidden />
 
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-2xl">
-        <h1 className="text-2xl font-bold text-amber-400/90 tracking-wide mb-1">
+        <h1 className="font-title text-2xl font-bold text-amber-400/90 tracking-wide mb-1">
           Lights Out
         </h1>
         <p className="text-slate-400 text-sm mb-6">Night Phase — Round {game.round_number}</p>
 
         <div className="rounded-lg border border-slate-700/80 bg-slate-900/80 p-4 mb-4">
           <p className="text-slate-300 text-sm">
-            You are <span className="font-semibold text-amber-400">{ROLE_LABELS[currentPlayer.role]}</span>
+            You are <span className="font-game-ui font-semibold text-amber-400 tracking-wide">{ROLE_LABELS[currentPlayer.role]}</span>
           </p>
         </div>
 
@@ -160,10 +206,17 @@ export function NightPhase({
         {!submitted && (
           <RoleMenu
             role={currentPlayer.role}
+            copiedRole={currentPlayer.role === "thief" ? currentPlayer.copied_role ?? null : null}
+            currentPlayerId={currentPlayer.id}
             otherAlive={otherAlive}
             hasBody={hasBody}
             isInvincible={currentPlayer.is_invincible}
             roundNumber={game.round_number}
+            botUsesLeft={currentPlayer.bot_uses_remaining ?? 2}
+            minerUsesLeft={currentPlayer.miner_uses_remaining ?? 2}
+            strongmanUsesLeft={currentPlayer.strongman_uses_remaining ?? 2}
+            undertakerUsesLeft={currentPlayer.undertaker_uses_remaining ?? 2}
+            thiefAlreadyCopied={!!currentPlayer.copied_role_from_player_id}
             onAceTarget={handleAce}
             onBotSwap={handleBot}
             onMinerTarget={handleMiner}
@@ -181,12 +234,22 @@ export function NightPhase({
   );
 }
 
+const ACTION_ROLES: Role[] = ["ace", "bot", "miner", "strongman", "undertaker"];
+
 interface RoleMenuProps {
   role: Role;
+  /** When Thief has copied, the role they copied (so we show that role's action UI). */
+  copiedRole: Role | null;
+  currentPlayerId: string;
   otherAlive: Player[];
   hasBody: boolean;
   isInvincible: boolean;
   roundNumber: number;
+  botUsesLeft: number;
+  minerUsesLeft: number;
+  strongmanUsesLeft: number;
+  undertakerUsesLeft: number;
+  thiefAlreadyCopied: boolean;
   onAceTarget: (targetId: string) => void;
   onBotSwap: (id1: string, id2: string) => void;
   onMinerTarget: (targetId: string) => void;
@@ -197,10 +260,17 @@ interface RoleMenuProps {
 
 function RoleMenu({
   role,
+  copiedRole,
+  currentPlayerId,
   otherAlive,
   hasBody,
   isInvincible,
   roundNumber,
+  botUsesLeft,
+  minerUsesLeft,
+  strongmanUsesLeft,
+  undertakerUsesLeft,
+  thiefAlreadyCopied,
   onAceTarget,
   onBotSwap,
   onMinerTarget,
@@ -216,11 +286,20 @@ function RoleMenu({
   const [strongmanTarget, setStrongmanTarget] = useState<string>("");
   const [thiefTarget, setThiefTarget] = useState<string>("");
 
-  switch (role) {
+  const effectiveRole: Role =
+    role === "thief" && thiefAlreadyCopied && copiedRole && ACTION_ROLES.includes(copiedRole)
+      ? copiedRole
+      : role;
+  const usingCopiedRole = role === "thief" && effectiveRole !== "thief";
+
+  switch (effectiveRole) {
     case "ace":
       return (
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-200">Eliminate a player</h2>
+          {usingCopiedRole && copiedRole && (
+            <p className="text-amber-400 text-sm">Using your copied role: <span className="font-game-ui">{ROLE_LABELS[copiedRole]}</span>.</p>
+          )}
+          <h2 className="font-title text-lg font-semibold text-slate-200">Eliminate a player</h2>
           <p className="text-slate-400 text-sm">Your choice is hidden until the Day phase.</p>
           <select
             value={aceTarget}
@@ -247,8 +326,12 @@ function RoleMenu({
     case "bot":
       return (
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-200">The Switcheroo</h2>
-          <p className="text-slate-400 text-sm">Pick two players to swap their roles. You cannot select yourself.</p>
+          {usingCopiedRole && copiedRole && (
+            <p className="text-amber-400 text-sm">Using your copied role: <span className="font-game-ui">{ROLE_LABELS[copiedRole]}</span>.</p>
+          )}
+          <h2 className="font-title text-lg font-semibold text-slate-200">The Switcheroo</h2>
+          <p className="text-slate-400 text-sm">Pick two players to swap their roles (excluding yourself). Uses left: {botUsesLeft}/2.</p>
+          {botUsesLeft < 1 && <p className="text-amber-400 text-sm">You have used both swaps this game.</p>}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-slate-400 text-xs mb-1">First player</label>
@@ -283,7 +366,7 @@ function RoleMenu({
           </div>
           <button
             onClick={() => botTarget1 && botTarget2 && onBotSwap(botTarget1, botTarget2)}
-            disabled={!botTarget1 || !botTarget2}
+            disabled={!botTarget1 || !botTarget2 || botUsesLeft < 1}
             className="w-full rounded-lg bg-violet-700 hover:bg-violet-600 disabled:opacity-50 text-white font-medium py-2"
           >
             Swap roles
@@ -294,8 +377,12 @@ function RoleMenu({
     case "miner":
       return (
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-200">The Tunnel</h2>
-          <p className="text-slate-400 text-sm">Choose a player to learn if they visited someone or stayed home.</p>
+          {usingCopiedRole && copiedRole && (
+            <p className="text-amber-400 text-sm">Using your copied role: <span className="font-game-ui">{ROLE_LABELS[copiedRole]}</span>.</p>
+          )}
+          <h2 className="font-title text-lg font-semibold text-slate-200">The Tunnel</h2>
+          <p className="text-slate-400 text-sm">Choose a player to learn if they visited someone or stayed home. Uses left: {minerUsesLeft}/2. (If you track the Bot, only one name is revealed.)</p>
+          {minerUsesLeft < 1 && <p className="text-amber-400 text-sm">You have used both investigations this game.</p>}
           <select
             value={minerTarget}
             onChange={(e) => setMinerTarget(e.target.value)}
@@ -310,7 +397,7 @@ function RoleMenu({
           </select>
           <button
             onClick={() => minerTarget && onMinerTarget(minerTarget)}
-            disabled={!minerTarget}
+            disabled={!minerTarget || minerUsesLeft < 1}
             className="w-full rounded-lg bg-amber-700 hover:bg-amber-600 disabled:opacity-50 text-white font-medium py-2"
           >
             Investigate
@@ -321,13 +408,17 @@ function RoleMenu({
     case "strongman":
       return (
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-200">Meatshield</h2>
+          {usingCopiedRole && copiedRole && (
+            <p className="text-amber-400 text-sm">Using your copied role: <span className="font-game-ui">{ROLE_LABELS[copiedRole]}</span>.</p>
+          )}
+          <h2 className="font-title text-lg font-semibold text-slate-200">Meatshield</h2>
           <p className="text-slate-400 text-sm">
-            {isInvincible
-              ? "You can protect one player. If the Ace targets them, the kill fails and you lose your invincibility."
-              : "You have already used your protection."}
+            Protect yourself or one other player (2 uses per game). If the Ace targets them, the kill fails.
           </p>
-          {isInvincible && (
+          <p className="text-slate-500 text-xs">Uses left: {strongmanUsesLeft}/2.</p>
+          {strongmanUsesLeft < 1 ? (
+            <p className="text-amber-400 text-sm">You have used both protections this game.</p>
+          ) : (
             <>
               <label className="flex items-center gap-2 text-slate-300">
                 <input
@@ -336,7 +427,7 @@ function RoleMenu({
                   onChange={(e) => setStrongmanProtect(e.target.checked)}
                   className="rounded border-slate-500"
                 />
-                Protect a player
+                Protect someone
               </label>
               {strongmanProtect && (
                 <>
@@ -346,6 +437,7 @@ function RoleMenu({
                     className="w-full rounded-lg bg-slate-800 border border-slate-600 text-slate-100 px-3 py-2"
                   >
                     <option value="">Select who to protect…</option>
+                    <option value={currentPlayerId}>Yourself</option>
                     {otherAlive.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.display_name}
@@ -381,13 +473,17 @@ function RoleMenu({
     case "undertaker":
       return (
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-200">Cleanup</h2>
+          {usingCopiedRole && copiedRole && (
+            <p className="text-amber-400 text-sm">Using your copied role: <span className="font-game-ui">{ROLE_LABELS[copiedRole]}</span>.</p>
+          )}
+          <h2 className="font-title text-lg font-semibold text-slate-200">Cleanup</h2>
           <p className="text-slate-400 text-sm">
             {hasBody
-              ? "A body is present. Clean it to temporarily gain that player's role for the next Night phase."
+              ? "Clean a body to use that player's role for the next night. Uses left: " + undertakerUsesLeft + "/2."
               : "No body to clean this round."}
           </p>
-          {hasBody && (
+          {undertakerUsesLeft < 1 && <p className="text-amber-400 text-sm">You have used both cleans this game.</p>}
+          {hasBody && undertakerUsesLeft > 0 && (
             <button
               onClick={onUndertakerClean}
               className="w-full rounded-lg bg-slate-600 hover:bg-slate-500 text-white font-medium py-2"
@@ -401,7 +497,7 @@ function RoleMenu({
     case "ghost":
       return (
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-200">Vengeance</h2>
+          <h2 className="font-title text-lg font-semibold text-slate-200">Vengeance</h2>
           <p className="text-slate-400 text-sm">
             You have no night action. If you are voted out during a meeting, you immediately choose one player to take with you—both are eliminated.
           </p>
@@ -412,7 +508,7 @@ function RoleMenu({
     case "professor":
       return (
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-200">The Reveal</h2>
+          <h2 className="font-title text-lg font-semibold text-slate-200">The Reveal</h2>
           <p className="text-slate-400 text-sm">
             After Round 3, you automatically discover and reveal the identity of the Ace. No action needed tonight.
           </p>
@@ -423,29 +519,40 @@ function RoleMenu({
     case "thief":
       return (
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-200">Identity Theft</h2>
-          <p className="text-slate-400 text-sm">
-            Choose one player. You swap your role with theirs—you get their role and they become the Thief.
-          </p>
-          <select
-            value={thiefTarget}
-            onChange={(e) => setThiefTarget(e.target.value)}
-            className="w-full rounded-lg bg-slate-800 border border-slate-600 text-slate-100 px-3 py-2"
-          >
-            <option value="">Select a player…</option>
-            {otherAlive.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.display_name}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={() => thiefTarget && onThiefSwap(thiefTarget)}
-            disabled={!thiefTarget}
-            className="w-full rounded-lg bg-amber-700 hover:bg-amber-600 disabled:opacity-50 text-white font-medium py-2"
-          >
-            Swap roles
-          </button>
+          <h2 className="font-title text-lg font-semibold text-slate-200">Identity Theft</h2>
+          {thiefAlreadyCopied ? (
+            <>
+              <p className="text-slate-400 text-sm">You have already copied a role for the rest of the game. You and the original player both have that role.</p>
+              {copiedRole && (copiedRole === "ghost" || copiedRole === "professor") && (
+                <p className="text-slate-500 text-sm">You are also <span className="font-game-ui">{ROLE_LABELS[copiedRole]}</span>. That role has no night action.</p>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="text-slate-400 text-sm">
+                Choose one player to copy their role. You gain that role for the rest of the game; they keep their role too (you both have it).
+              </p>
+              <select
+                value={thiefTarget}
+                onChange={(e) => setThiefTarget(e.target.value)}
+                className="w-full rounded-lg bg-slate-800 border border-slate-600 text-slate-100 px-3 py-2"
+              >
+                <option value="">Select a player…</option>
+                {otherAlive.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.display_name}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => thiefTarget && onThiefSwap(thiefTarget)}
+                disabled={!thiefTarget}
+                className="w-full rounded-lg bg-amber-700 hover:bg-amber-600 disabled:opacity-50 text-white font-medium py-2"
+              >
+                Copy role
+              </button>
+            </>
+          )}
         </section>
       );
 

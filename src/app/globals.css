@@ -26,9 +26,23 @@ body::after {
 body {
   background: var(--paper);
   color: var(--ink);
+  font-family: "Ranchers", cursive; /* Dialogue as default */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+}
+
+/* Main titles — Limelight (Art Deco movie poster) */
+h1, h2 {
+  font-family: "Limelight", cursive;
+}
+
+/* Buttons / action — Bangers (loud, hand-drawn) */
+button,
+a[role="button"],
+[class*="button"] {
+  font-family: "Bangers", cursive;
+  letter-spacing: 0.02em;
 }
 
 /* Night phase keeps dark + grain */
@@ -46,6 +60,35 @@ body {
   background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(20, 20, 20, 0.98) 0%, #0a0a0a 70%);
   min-height: 100vh;
   color: #e8e4dc;
+}
+
+/* Game background — vintage town (when game has started) */
+.game-background {
+  background-image: url("/town-background.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+  position: relative;
+}
+
+.game-background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.game-background > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* When game uses town background, night phase overlay is lighter so town shows */
+.game-background .night-lights-out {
+  background: rgba(0, 0, 0, 0.35);
 }
 
 /* Squash and stretch — rubber hose button hover */
