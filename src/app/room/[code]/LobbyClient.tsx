@@ -158,12 +158,20 @@ export function LobbyClient({ roomCode, useSupabase, initialPlayers }: LobbyClie
         </ul>
       </section>
 
-      <Link
-        href="/"
-        className="mt-8 text-ink-muted hover:text-ink text-sm"
-      >
-        ← Leave lobby
-      </Link>
+      <div className="mt-8 flex flex-col items-center gap-2">
+        <Link
+          href="/"
+          className="text-ink-muted hover:text-ink text-sm"
+        >
+          ← Leave lobby
+        </Link>
+        <Link
+          href="/"
+          className="text-ink-muted hover:text-ink text-xs"
+        >
+          Start a new production (new room)
+        </Link>
+      </div>
       </div>
     </main>
   );
